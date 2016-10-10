@@ -1,12 +1,13 @@
 var express = require('express');
 var app = express();
 var port = 3000;
+var USE_GRAPHIQL = true
 
 var graphql = require('graphql');
 var graphqlHTTP = require('express-graphql');
 
-var products = require('./data/products');
-var members = require('./data/members');
+var productList = require('./data/products');
+var memberList = require('./data/members');
 
 var productType = new graphql.GraphQLObjectType({
     name: 'Product',
@@ -16,6 +17,15 @@ var productType = new graphql.GraphQLObjectType({
         name: { type: graphql.GraphQLString },
         price: { type: graphql.GraphQLInt },
         limit: { type: graphql.GraphQLInt }
+    }
+});
+
+var memberType = new graphql.GraphQLObjectType({
+    name: 'Member',
+    fields: {
+        id: { type: graphql.GraphQLString },
+        mobile: { type: graphql.GraphQLString },
+        name: { type: graphql.GraphQLString }
     }
 });
 
@@ -29,15 +39,58 @@ var schema = new graphql.GraphQLSchema({
                     id: { type: graphql.GraphQLString }
                 },
                 resolve: function (_, args) {
-                    return products.filter(function (item) {
+                    return productList.filter(function (item) {
                         return item.id === args.id;
                     })[0];
+                }
+            },
+            prodcate: {
+                type: new graphql.GraphQLList(productType),
+                args: {
+                    category: { type: graphql.GraphQLString }
+                },
+                resolve: function (_, args) {
+                    return productList.filter(function (item) {
+                        return item.category === args.category;
+                    });
+                }
+            },
+            products: {
+                type: new graphql.GraphQLList(productType),
+                resolve: function () {
+                    return productList
+                }
+            },
+            member: {
+                type: memberType,
+                args: {
+                    id: { type: graphql.GraphQLString }
+                },
+                resolve: function (_, args) {
+                    return memberList.filter(function (item) {
+                        return item.id === args.id;
+                    })[0];
+                }
+            },
+            members: {
+                type: new graphql.GraphQLList(memberType),
+                resolve: function () {
+                    return memberList
                 }
             }
         }
     })
 });
 
-app.use('/graphql', graphqlHTTP({ schema: schema, graphiql: true }));
+if (!USE_GRAPHIQL) {
+    app.use('/graphql', graphqlHTTP({ schema: schema, graphiql: true }));
+} else {
+    app.all('/graphql', function(req, res, next) {
+        res.header("Access-Control-Allow-Origin", "*");
+        res.header("Access-Control-Allow-Headers", "X-Requested-With");
+        next();
+    });
+    app.use('/graphql', graphqlHTTP({ schema: schema, pretty: true }));
+}
 app.listen(port);
 console.log('server is running on localhost:' + port);

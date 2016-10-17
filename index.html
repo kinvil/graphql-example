@@ -26,7 +26,24 @@
             dataType: 'JSON',
             data: { query: value }
         }).done(function (data) {
-            console.log(data);
+            var str = '';
+            for (var key in data.data) {
+                str += key + '<br/>';
+                if (data.data[key].length) {
+                    for (var i = 0; i < data.data[key].length; i += 1) {
+                        for (var subKey in data.data[key][i]) {
+                            str += subKey + ': ' + data.data[key][i][subKey] + ', ';
+                        }
+                        str += '<br />';
+                    }
+                } else {
+                    for (var subKey in data.data[key]) {
+                        str += subKey + ': ' + data.data[key][subKey] + ', ';
+                    }
+                    str += '<br />';
+                }
+            }
+            $('#result').html(str);
         });
     });
 </script>

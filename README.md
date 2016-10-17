@@ -12,5 +12,5 @@ $ npm run dev
 
 run with static html
 ```
-$ npm run prod
+$ npm start
 ```

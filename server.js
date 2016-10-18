@@ -80,7 +80,7 @@ var schema = new graphql.GraphQLSchema({
                 }
             }
         }
-    });
+    })
 });
 
 if (USE_GRAPHIQL) {
